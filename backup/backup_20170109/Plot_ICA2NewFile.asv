@@ -1,0 +1,64 @@
+%% script to check ICA decompositions
+% loads set file with ICA-weights
+% loads raw file, epochs, resamples and rereferences data
+% get weights from first file
+
+
+clear all
+%% parameters
+F.Rootpath          = 'F:\work\data\SSVEP_volmov\EEG\';
+F.PathRAW           = [F.Rootpath 'RAW'];
+F.PathSET           = [F.Rootpath 'SET'];
+F.PathTFA           = [F.Rootpath 'TFA'];
+F.PathICA           = [F.Rootpath 'ICA'];
+F.PathBehav         = [F.Rootpath 'PRESENTATION'];
+% F.ChannFile         = ['/home/raid1/gundlach/Eigene Dateien/additional software/eeglab/eeglab9_0_5_6b/plugins/dipfit2.2/standard_BESA/standard-10-5-cap385.elp'];
+F.ChannFile         = 'C:\Users\HP-User\matlab\Skripte\Auswertungsskripte\Analyzer_G\ChanLocs\BioSemi64_8_1020.epf';
+F.Subjects          = ['01';];
+F.Sub2Use           = [1];
+F.Prefix            = ['VP'];
+F.Suffix            = ['_motor'];
+F.PresentName       = ['REFerence_lvl.txt'];
+F.EEGChans          = [1:64];
+F.Trigger           = {{'31'};{'26', '25'}};
+F.Epoch             = {[-2.5 2.5];[0 2]};
+
+F.Epoch             = [-3 25];
+F.Resample          = 250;
+
+%% load ICA file
+ALLEEG = []; EEG = [];
+EEG = pop_loadset('filename',[F.Prefix F.Subjects(F.Sub2Use,:) F.Suffix '.set'],'filepath',F.PathICA );
+[ALLEEG, EEG, CURRENTSET] = eeg_store( ALLEEG, EEG, 0 );
+
+%% load RAW file
+t.dir = dir([F.PathRAW '\' F.Prefix F.Subjects(F.Sub2Use,:) '_m*.bdf']);
+EEG = pop_loadbv(F.PathRAW, t.dir.name, 1, []);
+[ALLEEG, EEG, CURRENTSET] = eeg_store( ALLEEG, EEG, 0 );
+
+% resample
+if ~isempty(F.Resample)
+    EEG=pop_resample(EEG,F.Resample);
+end
+
+EEG.setname=t{i_file}.dir.name(1:end-4);
+        
+
+% chanlocs
+EEG.chanlocs=pop_chanedit(EEG.chanlocs,'load',{F.ChannFile,'filetype','besa (elp)'}); % Load Channel Locations
+% select data channels
+EEG = pop_select( EEG,'channel',F.EEGChans);
+% reref
+EEG = pop_reref( EEG, []);
+
+% epoch
+EEG = pop_epoch( EEG, F.Trigger{1}, F.Epoch{1}, 'epochinfo', 'yes');
+EEG = eeg_checkset( EEG );
+EEG = pop_rmbase( EEG, []);
+
+% get ICA information
+EEG = pop_editset(EEG, 'icachansind', 'ALLEEG(1).icachansind', 'icaweights', 'ALLEEG(1).icaweights', 'icasphere', 'ALLEEG(1).icasphere');
+[ALLEEG EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
+
+%% show ICA components
+pop_selectcomps(EEG, [1:64] );
