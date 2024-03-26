@@ -1299,7 +1299,7 @@ p.time2test         = [-3000 3500]; % time in ms
 
 p.time2test_idx     = dsearchn(TFA.time', p.time2test');
 
-p.tfce_olddate = '19-Mar-2024';
+p.tfce_olddate = '22-Mar-2024';
 startdate = date;
 savnam_tfce_tfa = sprintf('tfce_tfa_%1.2fe_%1.2fh_%s.mat',p.e_h(1),p.e_h(2),startdate);
 
@@ -1308,13 +1308,9 @@ data4tfce2_tfa = double(TFA.data_induced_bc(:,p.time2test_idx(1):p.time2test_idx
 data4tfce1_tfa = zeros(size(data4tfce2_tfa));
 eloc = TFA.electrodes;
 
-if exist([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate],'file') 
+if exist([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'],'file') 
     try % try to load previous file
-        load([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate])
-        % load data
-        t.path = fullfile(p.path, sprintf('subj%s',p.subs{p.subs2use(1)}));
-        load(fullfile(t.path, sprintf('subj%s_results_hypothesis3.mat',p.subs{p.subs2use(1)})), 'results')
-        
+        load([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'])       
     catch
         error('error when loading file')
     end
@@ -1328,11 +1324,491 @@ else % do tfce
         'type','d','plots',0,...
         'e_h',p.e_h,'nperm',p.nperm,...
         'flag_tfce',true,'flag_ft',false,... %channel testing
-        'savename',savnam_tfce_tfa);
+        'savename',savnam_tfce_tfa, ...
+        'flag_save',true);
 end
 
 ChN = ept_ChN2(eloc);
 res.cluster_tfa = ept_calculateClusters(results_tfce_tfa,ChN,0.05);
+
+
+% what do I want to show
+% - frequency spectrum
+% - time frequency plot (for peak electrodes)?
+% - electrode by time plot showing significant differences
+% - topography: plotting significant timepoints by electrode
+
+t.data = permute(data4tfce2_tfa,[4 3 1 2]);
+t.data_time = TFA.time(p.time2test_idx(1):p.time2test_idx(2));
+clear h
+for i_cluster = 1:numel(res.cluster_tfa)
+    
+    h.fig(i_cluster)=figure;
+    set(gcf,'Position',[100 100 1300 300],'PaperPositionMode','auto')
+    tiledlayout(1,7,'TileSpacing','compact')
+
+    t.cluster_loc = repmat(res.cluster_tfa(i_cluster).cluster_locations,[size(data4tfce2_tfa,4),1,1,1]);
+    t.cluster_chan = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[2,3]));
+    t.cluster_time = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,2]));
+    t.cluster_freq = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,3]));
+    
+    % frequency spectrum for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    t.data2 = t.data; t.data2(~t.cluster_loc) = nan;
+    pl.cluster_data = squeeze(mean(t.data2,[1,2,4],"omitnan"));
+    pl.clusterElec_data = squeeze(mean(t.data(:,t.cluster_chan,:,t.cluster_time),[1 2 4]));
+%     pl.clusterElec_data = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,t.cluster_time),[1 2 4]));
+
+    nexttile([1 2])
+    % plot spectrum at frequency
+    plot(TFA.frequency,pl.clusterElec_data,'Color',[0.3 0.3 0.3])
+    hold on
+    plot(TFA.frequency,pl.cluster_data,'Color',[0.9 0.3 0.3])
+    xlabel('frequency in Hz')
+    ylabel('modulation in %')
+    xlim([TFA.frequency(1) TFA.frequency(end)])
+    title(sprintf('spectra | comp %1.0f | [%1.0f %1.0f]ms', ...
+        i_cluster, t.data_time(find(diff(t.cluster_time)~=0))))
+    legend({sprintf('peak electrode %s',TFA.electrodes(pl.elec2plot_now_i).labels);'only sign. data'},'Location','southoutside','Orientation','horizontal')
+    grid on
+    
+
+    % time-frequency-plot for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    
+    pl.plotdata = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,:),[1,2]));
+    pl.clim = [-1 1]*max(abs(pl.plotdata),[],'all');
+
+    pl.plotdata_sign = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,1));
+    
+    nexttile([1 2])
+    imagesc(t.data_time,TFA.frequency,pl.plotdata,pl.clim)
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    hold on
+    contour(t.data_time,TFA.frequency,pl.plotdata_sign,'EdgeColor','g')
+    title(sprintf('TFA at peak elec. %s | cluster in green (for all elecs)', ...
+        TFA.electrodes(pl.elec2plot_now_i).labels))
+    xlabel('time in ms')
+    ylabel('frequency in Hz')
+    set(gca,'FontSize',8)
+    % set(gca,'ColorScale','log')
+    cb = colorbar();
+
+    % time by electrode plot
+    pl.plotdata = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2));
+
+    nexttile([1 2])
+    imagesc(t.data_time,1:64,pl.plotdata,[-1 1])
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    set(gca,'YTick',0:5:64,'YTickLabel',{TFA.electrodes(5:5:64).labels})
+    title('electrodes in cluster across time')
+
+    % electrode position as summed values
+
+    nexttile([1 1])
+    pl.plotdata = sum(squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2)),2);
+    topoplot(pl.plotdata, eloc, ...
+                'shading', 'flat', 'numcontour', 0, 'conv','on','maplimits',[0 max(pl.plotdata)], ...
+                'colormap',cbrewer2('PuBuGn'),'whitebk','on');
+        title(sprintf('significant electrodes in cluster'))
+
+    colorbar
+
+
+
+
+    
+end
+
+%% do complete data driven TFCE | for frequency band alpha
+p.e_h               = [0.66 2]; % tfce parameter
+p.Samp              = 128; % data sampling rate (TFA.srate)
+p.nperm             = 10000; % number of permutations, if feasible use 100000
+p.plevel            = 0.05;
+p.time2test         = [-3000 3500]; % time in ms
+p.freq2test         = [8 14]; % frequency in Hz
+
+p.time2test_idx     = dsearchn(TFA.time', p.time2test');
+p.freq2test_idx     = dsearchn(TFA.frequency', p.freq2test');
+
+
+p.tfce_olddate = '22-Mar-2024';
+startdate = date;
+savnam_tfce_tfa = sprintf('tfce_tfa_freqrange_alpha%1.2fe_%1.2fh_%s.mat',p.e_h(1),p.e_h(2),startdate);
+
+% preallocate data
+data4tfce2_tfa = double(TFA.data_induced_bc(p.freq2test_idx(1):p.freq2test_idx(2),p.time2test_idx(1):p.time2test_idx(2),:,:));
+data4tfce1_tfa = zeros(size(data4tfce2_tfa));
+eloc = TFA.electrodes;
+
+if exist([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'],'file') 
+    try % try to load previous file
+        load([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'])       
+    catch
+        error('error when loading file')
+    end
+    results_tfce_tfa = Results;
+else % do tfce
+    % tfce on two dimensions (channels x freq x time), subjects have to be in dim 1
+    % channel neighborhood calculated within ept_TFCE function
+
+    results_tfce_tfa= ept_TFCE(permute(data4tfce1_tfa,[4 3 1 2]),permute(data4tfce2_tfa,[4 3 1 2]),...
+        eloc,'rsample',p.Samp,...
+        'type','d','plots',0,...
+        'e_h',p.e_h,'nperm',p.nperm,...
+        'flag_tfce',true,'flag_ft',false,... %channel testing
+        'savename',savnam_tfce_tfa, ...
+        'flag_save',true);
+end
+
+ChN = ept_ChN2(eloc);
+res.cluster_tfa = ept_calculateClusters(results_tfce_tfa,ChN,0.05);
+
+
+% what do I want to show
+% - frequency spectrum
+% - time frequency plot (for peak electrodes)?
+% - electrode by time plot showing significant differences
+% - topography: plotting significant timepoints by electrode
+
+t.data = permute(data4tfce2_tfa,[4 3 1 2]);
+t.data_time = TFA.time(p.time2test_idx(1):p.time2test_idx(2));
+clear h
+for i_cluster = 1:numel(res.cluster_tfa)
+    
+    h.fig(i_cluster)=figure;
+    set(gcf,'Position',[100 100 1300 300],'PaperPositionMode','auto')
+    tiledlayout(1,7,'TileSpacing','compact')
+
+    t.cluster_loc = repmat(res.cluster_tfa(i_cluster).cluster_locations,[size(data4tfce2_tfa,4),1,1,1]);
+    t.cluster_chan = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[2,3]));
+    t.cluster_time = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,2]));
+    t.cluster_freq = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,3]));
+    
+    % frequency spectrum for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    t.data2 = t.data; t.data2(~t.cluster_loc) = nan;
+    pl.cluster_data = squeeze(mean(t.data2,[1,2,4],"omitnan"));
+    pl.clusterElec_data = squeeze(mean(t.data(:,t.cluster_chan,:,t.cluster_time),[1 2 4]));
+%     pl.clusterElec_data = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,t.cluster_time),[1 2 4]));
+
+    nexttile([1 2])
+    % plot spectrum at frequency
+    plot(TFA.frequency,pl.clusterElec_data,'Color',[0.3 0.3 0.3])
+    hold on
+    plot(TFA.frequency,pl.cluster_data,'Color',[0.9 0.3 0.3])
+    xlabel('frequency in Hz')
+    ylabel('modulation in %')
+    xlim([TFA.frequency(1) TFA.frequency(end)])
+    title(sprintf('spectra | comp %1.0f | [%1.0f %1.0f]ms', ...
+        i_cluster, t.data_time(find(diff(t.cluster_time)~=0))))
+    legend({sprintf('peak electrode %s',TFA.electrodes(pl.elec2plot_now_i).labels);'only sign. data'},'Location','southoutside','Orientation','horizontal')
+    grid on
+    
+
+    % time-frequency-plot for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    
+    pl.plotdata = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,:),[1,2]));
+    pl.clim = [-1 1]*max(abs(pl.plotdata),[],'all');
+
+    pl.plotdata_sign = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,1));
+    
+    nexttile([1 2])
+    imagesc(t.data_time,TFA.frequency,pl.plotdata,pl.clim)
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    hold on
+    contour(t.data_time,TFA.frequency,pl.plotdata_sign,'EdgeColor','g')
+    title(sprintf('TFA at peak elec. %s | cluster in green (for all elecs)', ...
+        TFA.electrodes(pl.elec2plot_now_i).labels))
+    xlabel('time in ms')
+    ylabel('frequency in Hz')
+    set(gca,'FontSize',8)
+    % set(gca,'ColorScale','log')
+    cb = colorbar();
+
+    % time by electrode plot
+    pl.plotdata = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2));
+
+    nexttile([1 2])
+    imagesc(t.data_time,1:64,pl.plotdata,[-1 1])
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    set(gca,'YTick',0:5:64,'YTickLabel',{TFA.electrodes(5:5:64).labels})
+    title('electrodes in cluster across time')
+
+    % electrode position as summed values
+
+    nexttile([1 1])
+    pl.plotdata = sum(squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2)),2);
+    topoplot(pl.plotdata, eloc, ...
+                'shading', 'flat', 'numcontour', 0, 'conv','on','maplimits',[0 max(pl.plotdata)], ...
+                'colormap',cbrewer2('PuBuGn'),'whitebk','on');
+        title(sprintf('significant electrodes in cluster'))
+
+    colorbar
+
+
+
+
+    
+end
+
+
+%% do complete data driven TFCE | for frequency band beta
+p.e_h               = [0.66 2]; % tfce parameter
+p.Samp              = 128; % data sampling rate (TFA.srate)
+p.nperm             = 10000; % number of permutations, if feasible use 100000
+p.plevel            = 0.05;
+p.time2test         = [-3000 3500]; % time in ms
+p.freq2test         = [15 30]; % frequency in Hz
+
+p.time2test_idx     = dsearchn(TFA.time', p.time2test');
+p.freq2test_idx     = dsearchn(TFA.frequency', p.freq2test');
+
+
+p.tfce_olddate = '22-Mar-2024';
+startdate = date;
+savnam_tfce_tfa = sprintf('tfce_tfa_freqrange_beta%1.2fe_%1.2fh_%s.mat',p.e_h(1),p.e_h(2),startdate);
+
+% preallocate data
+data4tfce2_tfa = double(TFA.data_induced_bc(p.freq2test_idx(1):p.freq2test_idx(2),p.time2test_idx(1):p.time2test_idx(2),:,:));
+data4tfce1_tfa = zeros(size(data4tfce2_tfa));
+eloc = TFA.electrodes;
+
+if exist([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'],'file') 
+    try % try to load previous file
+        load([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'])       
+    catch
+        error('error when loading file')
+    end
+    results_tfce_tfa = Results;
+else % do tfce
+    % tfce on two dimensions (channels x freq x time), subjects have to be in dim 1
+    % channel neighborhood calculated within ept_TFCE function
+
+    results_tfce_tfa= ept_TFCE(permute(data4tfce1_tfa,[4 3 1 2]),permute(data4tfce2_tfa,[4 3 1 2]),...
+        eloc,'rsample',p.Samp,...
+        'type','d','plots',0,...
+        'e_h',p.e_h,'nperm',p.nperm,...
+        'flag_tfce',true,'flag_ft',false,... %channel testing
+        'savename',savnam_tfce_tfa, ...
+        'flag_save',true);
+end
+
+ChN = ept_ChN2(eloc);
+res.cluster_tfa = ept_calculateClusters(results_tfce_tfa,ChN,0.05);
+
+
+% what do I want to show
+% - frequency spectrum
+% - time frequency plot (for peak electrodes)?
+% - electrode by time plot showing significant differences
+% - topography: plotting significant timepoints by electrode
+
+t.data = permute(data4tfce2_tfa,[4 3 1 2]);
+t.data_time = TFA.time(p.time2test_idx(1):p.time2test_idx(2));
+clear h
+for i_cluster = 1:numel(res.cluster_tfa)
+    
+    h.fig(i_cluster)=figure;
+    set(gcf,'Position',[100 100 1300 300],'PaperPositionMode','auto')
+    tiledlayout(1,7,'TileSpacing','compact')
+
+    t.cluster_loc = repmat(res.cluster_tfa(i_cluster).cluster_locations,[size(data4tfce2_tfa,4),1,1,1]);
+    t.cluster_chan = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[2,3]));
+    t.cluster_time = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,2]));
+    t.cluster_freq = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1,3]));
+    
+    % frequency spectrum for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    t.data2 = t.data; t.data2(~t.cluster_loc) = nan;
+    pl.cluster_data = squeeze(mean(t.data2,[1,2,4],"omitnan"));
+    pl.clusterElec_data = squeeze(mean(t.data(:,t.cluster_chan,:,t.cluster_time),[1 2 4]));
+%     pl.clusterElec_data = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,t.cluster_time),[1 2 4]));
+
+    nexttile([1 2])
+    % plot spectrum at frequency
+    plot(TFA.frequency,pl.clusterElec_data,'Color',[0.3 0.3 0.3])
+    hold on
+    plot(TFA.frequency,pl.cluster_data,'Color',[0.9 0.3 0.3])
+    xlabel('frequency in Hz')
+    ylabel('modulation in %')
+    xlim([TFA.frequency(1) TFA.frequency(end)])
+    title(sprintf('spectra | comp %1.0f | [%1.0f %1.0f]ms', ...
+        i_cluster, t.data_time(find(diff(t.cluster_time)~=0))))
+    legend({sprintf('peak electrode %s',TFA.electrodes(pl.elec2plot_now_i).labels);'only sign. data'},'Location','southoutside','Orientation','horizontal')
+    grid on
+    
+
+    % time-frequency-plot for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    
+    pl.plotdata = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,:),[1,2]));
+    pl.clim = [-1 1]*max(abs(pl.plotdata),[],'all');
+
+    pl.plotdata_sign = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,1));
+    
+    nexttile([1 2])
+    imagesc(t.data_time,TFA.frequency,pl.plotdata,pl.clim)
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    hold on
+    contour(t.data_time,TFA.frequency,pl.plotdata_sign,'EdgeColor','g')
+    title(sprintf('TFA at peak elec. %s | cluster in green (for all elecs)', ...
+        TFA.electrodes(pl.elec2plot_now_i).labels))
+    xlabel('time in ms')
+    ylabel('frequency in Hz')
+    set(gca,'FontSize',8)
+    % set(gca,'ColorScale','log')
+    cb = colorbar();
+
+    % time by electrode plot
+    pl.plotdata = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2));
+
+    nexttile([1 2])
+    imagesc(t.data_time,1:64,pl.plotdata,[-1 1])
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YDir','normal')
+    set(gca,'YTick',0:5:64,'YTickLabel',{TFA.electrodes(5:5:64).labels})
+    title('electrodes in cluster across time')
+
+    % electrode position as summed values
+
+    nexttile([1 1])
+    pl.plotdata = sum(squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,2)),2);
+    topoplot(pl.plotdata, eloc, ...
+                'shading', 'flat', 'numcontour', 0, 'conv','on','maplimits',[0 max(pl.plotdata)], ...
+                'colormap',cbrewer2('PuBuGn'),'whitebk','on');
+        title(sprintf('significant electrodes in cluster'))
+
+    colorbar
+
+
+
+
+    
+end
+
+
+%% do frequency band collapsed data driven TFCE
+p.e_h               = [0.66 2]; % tfce parameter
+p.Samp              = 128; % data sampling rate (TFA.srate)
+p.nperm             = 10000; % number of permutations, if feasible use 100000
+p.plevel            = 0.05;
+p.time2test         = [-3000 3500]; % time in ms
+p.freq2test         = [8 12]; % frequency in Hz alpha
+% p.freq2test         = [8 14]; % frequency in Hz alpha
+% p.freq2test         = [15 20]; % frequency in Hz low beta
+% p.freq2test         = [20 30]; % frequency in Hz high beta
+
+
+p.time2test_idx     = dsearchn(TFA.time', p.time2test');
+p.freq2test_idx     = dsearchn(TFA.frequency', p.freq2test');
+
+
+p.tfce_olddate = '26-Mar-2024';
+startdate = date;
+savnam_tfce_tfa = sprintf('tfce_tfa_freqcollapsed_%1.0f_to_%1.0f_Hz_%1.2fe_%1.2fh_%s.mat',p.freq2test,p.e_h(1),p.e_h(2),startdate);
+
+% preallocate data
+data4tfce2_tfa= double(squeeze(mean(TFA.data_induced_bc(p.freq2test_idx(1):p.freq2test_idx(2),p.time2test_idx(1):p.time2test_idx(2),:,:),1)));
+data4tfce1_tfa = zeros(size(data4tfce2_tfa));
+eloc = TFA.electrodes;
+
+if exist([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'],'file') 
+    try % try to load previous file
+        load([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) p.tfce_olddate '.mat'])       
+    catch
+        error('error when loading file')
+    end
+    results_tfce_tfa = Results;
+else % do tfce
+    % tfce on two dimensions (channels x time), subjects have to be in dim 1
+    % channel neighborhood calculated within ept_TFCE function
+
+    results_tfce_tfa= ept_TFCE(permute(data4tfce1_tfa,[3 2 1 ]),permute(data4tfce2_tfa,[3 2 1]),...
+        eloc,'rsample',p.Samp,...
+        'type','d','plots',0,...
+        'e_h',p.e_h,'nperm',p.nperm,...
+        'flag_tfce',true,'flag_ft',false,... %channel testing
+        'savename',savnam_tfce_tfa, ...
+        'flag_save',true);
+end
+
+ChN = ept_ChN2(eloc);
+res.cluster_tfa = ept_calculateClusters(results_tfce_tfa,ChN,0.05);
+
+
+% what do I want to show
+% - plot (for peak electrodes)?
+% - electrode by time plot showing significant differences
+% - topography: plotting significant timepoints by electrode
+
+t.data = permute(data4tfce2_tfa,[3 2 1 ]);
+t.data_time = TFA.time(p.time2test_idx(1):p.time2test_idx(2));
+clear h
+for i_cluster = 1:numel(res.cluster_tfa)
+    
+    h.fig(i_cluster)=figure;
+    set(gcf,'Position',[100 100 1300 300],'PaperPositionMode','auto')
+    tiledlayout(1,5,'TileSpacing','compact')
+
+    t.cluster_loc = repmat(res.cluster_tfa(i_cluster).cluster_locations,[size(data4tfce2_tfa,3),1,1]);
+    t.cluster_chan = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[2]));
+    t.cluster_time = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,[1]));
+    
+    
+        
+
+    % time-frequency-plot for peak electrode
+    pl.elec2plot_now_i = res.cluster_tfa(i_cluster).channel_peak;
+    
+    pl.plotdata = squeeze(mean(t.data(:,pl.elec2plot_now_i,:,:),[1,2]));
+    pl.clim = [-1 1]*max(abs(pl.plotdata),[],'all');
+
+    pl.plotdata_sign = squeeze(any(res.cluster_tfa(i_cluster).cluster_locations,1));
+    pl.plotdata_sign_data = pl.plotdata;  pl.plotdata_sign_data(~pl.plotdata_sign)=nan;
+    
+    nexttile([1 2])
+    plot(t.data_time,pl.plotdata,'Color',[0.3 0.3 0.3])
+    hold on
+    plot(t.data_time,pl.plotdata_sign_data,'Color',[0.9 0.3 0.3],'LineWidth',2)
+    xlabel('time in ms')
+    ylabel('amplitude in \muV/m²')
+    title(sprintf('time course at peak elec. %s | freq [%1.0f %1.0f]Hz', ...
+        TFA.electrodes(pl.elec2plot_now_i).labels, p.freq2test ))
+    grid on
+
+    % time by electrode plot
+    pl.plotdata = res.cluster_tfa(i_cluster).cluster_locations;
+
+    nexttile([1 2])
+    imagesc(t.data_time,1:64,pl.plotdata,[-1 1])
+    colormap(gca, flipud(cbrewer2('RdBu'))) % magma, viridis, plasma, parula, fake_parula, jet, inferno, cbrewer2('RdBu'),flipud(cbrewer2('RdBu'))
+    set(gca,'YTick',0:5:64,'YTickLabel',{TFA.electrodes(5:5:64).labels})
+    set(gca,'YDir','normal')
+    title('electrodes in cluster across time')
+
+    % electrode position as summed values
+
+    nexttile([1 1])
+    pl.plotdata = sum(res.cluster_tfa(i_cluster).cluster_locations,2);
+    topoplot(pl.plotdata, eloc, ...
+                'shading', 'flat', 'numcontour', 0, 'conv','on','maplimits',[0 max(pl.plotdata)], ...
+                'colormap',cbrewer2('PuBuGn'),'whitebk','on');
+        title(sprintf('significant electrodes in cluster'))
+
+    colorbar
+
+
+
+
+    
+end
 
 %% topoplot
 % pl.time2plot=[500 2000];
