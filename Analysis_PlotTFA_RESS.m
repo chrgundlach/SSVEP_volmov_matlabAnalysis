@@ -778,7 +778,7 @@ colormap(gca,t.colormap)
 
 %% plot timecourse of frequency
 % pl.freq2plot=[14.16667 14.16667];
-pl.freq2plot=[10 14];
+pl.freq2plot=[8 14];
 % pl.freq2plot=[15 25];
 % pl.freq2plot=[20 30];
 % pl.freq2plot=[8 14];
@@ -794,8 +794,8 @@ pl.freq2plot=[10 14];
 % pl.elec2plot = {'POz'}; % vis alpha II
 % pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; % vis alpha III
 % pl.elec2plot = {'POz';'Pz';'P1';'P2'}; % vis alpha II
-% pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
-pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; % motor alpha/beta II
+pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
+% pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; % motor alpha/beta II
 % pl.elec2plot = {TFA.electrodes(1:64).labels}';
 pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), pl.elec2plot, 'UniformOutput',false)),1));
 
@@ -1012,6 +1012,15 @@ pl.parameters = {...
 %     [8 12] {'CP1';'CPz';'CP2';'P1';'Pz';'P2'} 'data_induced_bc' [0 0.8 0.8] 2 'parietal alpha' 'noRESS';...
 %     };
 
+% most straight forward?
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+    [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+    [15 20] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot low beta' 'noRESS';...
+    [20 30] {'C3';'CP3'} 'data_induced_bc' [23 150 118]./255 2 'mot high beta' 'noRESS';...
+    };
+
 
 
 
@@ -1174,6 +1183,14 @@ pl.parameters = {...
 %     };
 
 
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+    [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+    [15 20] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot low beta' 'noRESS';...
+    [20 30] {'C3';'CP3'} 'data_induced_bc' [23 150 118]./255 2 'mot high beta' 'noRESS';...
+    };
+
 
 
 
@@ -1225,8 +1242,8 @@ for i_pl = 1:size(pl.parameters,1)
     eval(com)
     [tt.h tt.p tt.ci tt.stats]=ttest(pl.data');
     % do cluster based permutation
-%     [cluster_runt_diff, timecourse_runt_diff]=eeg_erpStat_clusterP(pl.data,zeros(size(pl.data)),pl.permut_n,2);
-%     tt.p(timecourse_runt_diff.h_corr==0)=1;
+    [cluster_runt_diff, timecourse_runt_diff]=eeg_erpStat_clusterP(pl.data,zeros(size(pl.data)),pl.permut_n,2);
+    tt.p(timecourse_runt_diff.h_corr==0)=1;
        
     % actual plot with boundedline
     pl.mdata = mean(pl.data,2)';
@@ -1278,16 +1295,17 @@ for i_pl = 1:size(pl.parameters,1)
 end
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
+sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
-sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_5'};
+sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_6'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
 for i_fig = 1:1
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
-%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-painters','-r300')
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
+    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
+    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
 end
 
 %% do complete data driven TFCE
