@@ -1857,6 +1857,225 @@ for i_cluster = 1:numel(res.cluster_tfa)
     
 end
 
+
+
+
+%% do electrode collapsed data driven cluser correction
+p.e_h               = [0.66 2]; % tfce parameter
+p.Samp              = 128; % data sampling rate (TFA.srate)
+p.nperm             = 10000; % number of permutations, if feasible use 100000
+p.plevel            = 0.05;
+p.time2test         = [-3000 3500]; % time in ms
+p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
+% p.elec2test         = {'P9';'P10';'PO7';'P7';'P8';'P5';'P6';'PO3';'PO4';'O1';'O2';'I1';'I2'}; pl.elecname = 'visuooccipittemporal';%visual 
+% p.elec2test         = {'C3';'CP3';'C5';'CP5'}; pl.elecname = 'leftmotor'; % motor
+% p.elec2test         = {'C3';'CP3'}; pl.elecname = 'smallleftmotor'; % motor
+
+
+p.time2test_idx     = dsearchn(TFA.time', p.time2test');
+pl.elec2test_i      = logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), p.elec2test, 'UniformOutput',false)),1));
+
+p.overwrite         = false; % redo calculation
+p.overwrite         = true; % redo calculation
+
+
+% p.tfce_olddate = '26-Mar-2024';
+startdate = datetime("today");
+savnam_tfce_tfa = sprintf('clustercorrection_tfa_eleccollapsed_%s_%s.mat',pl.elecname,startdate);
+
+% preallocate data
+data4tfce2_tfa= double(squeeze(mean(TFA.data_induced_bc(:,p.time2test_idx(1):p.time2test_idx(2),pl.elec2test_i,:),3)));
+data4tfce1_tfa = zeros(size(data4tfce2_tfa));
+eloc = TFA.electrodes(1);
+
+clear res
+
+if ~isempty(dir([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) '*.mat'])) && ~p.overwrite 
+    try % try to load previous file
+        % load most recent file
+        t.dir = dir([savnam_tfce_tfa(1:regexp(savnam_tfce_tfa,[date '.mat'])-1) '*.mat']);
+        [~, t.fileidx] = max([t.dir.datenum]);
+        load(t.dir(t.fileidx).name)       
+    catch
+        error('error when loading file')
+    end
+else % do cluster correction
+    % first comparison of real data
+    res.data4cc2_tfa = data4tfce2_tfa;
+    res.data4cc1_tfa = data4tfce1_tfa;
+    
+    % t.test
+    [tt.h,tt.p,tt.ci,tt.stats] = ttest(res.data4cc2_tfa,res.data4cc1_tfa,'Dim',3);
+
+    % extract data
+    res.data.tt.h = tt.h; res.data.tt.p = tt.p; res.data.tt.tstat = tt.stats.tstat;
+
+    % do cluster calculaten
+    res.data.tt.clusterlabel = bwlabel(res.data.tt.h);
+    t.clusternum = 1:max(res.data.tt.clusterlabel,[],'all');
+
+    % extract cluster information
+    for i_cluster = 1:max(t.clusternum)
+        % index cluster
+        res.data.clust(i_cluster).clusternum = i_cluster;
+        res.data.clust(i_cluster).clustersize = sum(res.data.tt.clusterlabel==i_cluster,"all");
+        [res.data.clust(i_cluster).freqrange(1), res.data.clust(i_cluster).freqrange(2)] = ...
+            bounds(TFA.frequency(any(res.data.tt.clusterlabel==i_cluster,2)));
+        [res.data.clust(i_cluster).timerange(1), res.data.clust(i_cluster).timerange(2)] = ...
+            bounds(TFA.time(find(any(res.data.tt.clusterlabel==i_cluster,1))+p.time2test_idx(1)-1));
+        res.data.clust(i_cluster).tsum = sum(res.data.tt.tstat(res.data.tt.clusterlabel==i_cluster),"all");
+        if res.data.clust(i_cluster).tsum<0
+            res.data.clust(i_cluster).tpeak = min(res.data.tt.tstat(res.data.tt.clusterlabel==i_cluster),[],"all");
+        else
+            res.data.clust(i_cluster).tpeak = max(res.data.tt.tstat(res.data.tt.clusterlabel==i_cluster),[],"all");
+        end
+        res.data.clust(i_cluster).ppeak = min(res.data.tt.p(res.data.tt.clusterlabel==i_cluster),[],"all");
+    end
+
+    % now do the same thing for the permutation
+    % first append data (to sample from null distribution)
+    res.data4cc_permute = cat(3,res.data4cc2_tfa, res.data4cc1_tfa);
+    % all combinations of reaarrangement
+    t.permidx = [false(size(res.data4cc_permute,3)/2,1); true(size(res.data4cc_permute,3)/2,1)];
+    t.permidxs = repmat(false(size(res.data4cc_permute,3),1),1,p.nperm);
+    for i_rand = 1:p.nperm
+        t.permidxs(:,i_rand) = t.permidx(randperm(numel(t.permidx)));
+        % create unique solutions
+        while i_rand > 1 & ismember(t.permidxs(:,i_rand)',t.permidxs(:,1:i_rand-1)','rows')
+            t.permidxs(:,i_rand) = t.permidx(randperm(numel(t.permidx)))
+        end
+    end
+    % now do the loop across these permutations
+    res.perm.clust = [];
+    fprintf('running %1.0f permutations | progress in %%: 0',p.nperm)
+    t.update_num = linspace(0,p.nperm,11);
+    t.update_perc = linspace(0,100,11);
+    for i_rand = 1:p.nperm
+        % display progress
+        if any(i_rand == t.update_num)
+            fprintf('%3.0f ',t.update_perc(i_rand == t.update_num))
+        end
+        % do ttest of data
+        [tt.h,tt.p,tt.ci,tt.stats] = ttest( ...
+            res.data4cc_permute(:,:,t.permidxs(:,i_rand)), ...
+            res.data4cc_permute(:,:,~t.permidxs(:,i_rand)), ...
+            'Dim',3);
+        
+        % do cluster calculaten
+        t.tt.clusterlabel = bwlabel(tt.h);
+        t.clusternum = 1:max(t.tt.clusterlabel,[],'all');
+
+        % extract cluster information
+        t.clust = [];
+        for i_cluster = 1:max(t.clusternum)
+            % index cluster
+            t.clust(i_cluster).clusternum = i_cluster;
+            t.clust(i_cluster).clustersize = sum(t.tt.clusterlabel==i_cluster,"all");
+            t.clust(i_cluster).tsum = sum(tt.stats.tstat(t.tt.clusterlabel==i_cluster),"all");
+            if t.clust(i_cluster).tsum<0
+                t.clust(i_cluster).tpeak = min(tt.stats.tstat(t.tt.clusterlabel==i_cluster),[],"all");
+            else
+                t.clust(i_cluster).tpeak = max(tt.stats.tstat(t.tt.clusterlabel==i_cluster),[],"all");
+            end
+            t.clust(i_cluster).ppeak = min(tt.p(t.tt.clusterlabel==i_cluster),[],"all");
+        end
+
+        % extract important info
+        res.perm.clust(i_rand).maxclustersize = max([t.clust.clustersize]);
+        res.perm.clust(i_rand).maxtsum = max([t.clust.tsum]);
+        res.perm.clust(i_rand).maxtpeak = max([t.clust.tpeak]);
+        res.perm.clust(i_rand).mintsum = min([t.clust.tsum]);
+        res.perm.clust(i_rand).mintpeak = min([t.clust.tpeak]);
+        res.perm.clust(i_rand).minppeak = min([t.clust.ppeak]);
+
+        % graphically check values
+        %figure; histogram([res.perm.clust.maxtsum],50)
+    end
+    fprintf('...done!\n')
+
+    % now compare each of the clusters and create empirical p-values
+    for i_cluster = 1:size(res.data.clust,2)
+        % empirical p-value for clustersize
+        res.data.clust(i_cluster).pMC_clustersize = ...
+            sum([res.perm.clust.maxclustersize]>res.data.clust(i_cluster).clustersize)/ ...
+            (p.nperm + 1);
+        res.data.clust(i_cluster).hMC_clustersize = ...
+             res.data.clust(i_cluster).pMC_clustersize < p.plevel;
+        % empirical p-value for tsum
+        if res.data.clust(i_cluster).tsum > 0
+            res.data.clust(i_cluster).pMC_tsum = ...
+                sum([res.perm.clust.maxtsum]>res.data.clust(i_cluster).tsum)/ ...
+                (p.nperm + 1);
+        else
+            res.data.clust(i_cluster).pMC_tsum = ...
+                sum([res.perm.clust.mintsum]<res.data.clust(i_cluster).tsum)/ ...
+                (p.nperm + 1);
+        end
+        res.data.clust(i_cluster).hMC_tsum = ...
+             res.data.clust(i_cluster).pMC_tsum < p.plevel;
+        % empirical p-value for tpeak
+        if res.data.clust(i_cluster).tsum > 0
+            res.data.clust(i_cluster).pMC_tpeak = ...
+                sum([res.perm.clust.maxtpeak]>res.data.clust(i_cluster).tpeak)/ ...
+                (p.nperm + 1);
+        else
+            res.data.clust(i_cluster).pMC_tpeak = ...
+                sum([res.perm.clust.mintpeak]<res.data.clust(i_cluster).tpeak)/ ...
+                (p.nperm + 1);
+        end
+        res.data.clust(i_cluster).hMC_tpeak = ...
+             res.data.clust(i_cluster).pMC_tpeak < p.plevel;
+    end
+
+    % graphical check
+    % figure; histogram([res.perm.clust.mintpeak],100); hold on; histogram([res.perm.clust.maxtpeak],100)
+    % figure; histogram([res.perm.clust.mintsum],100); hold on; histogram([res.perm.clust.maxtsum],100)
+    
+    % save current file
+    res.p = p;
+    res.date = startdate;
+    res = rmfield(res,'data4cc_permute');
+    save(savnam_tfce_tfa,'res')
+    
+end
+
+% plot TFA with clursters
+figure;
+pl.data_ind = mean(res.data4cc2_tfa,3);
+pl.clim = [-1 1]*max(abs(pl.data_ind),[],'all');
+imagesc(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.data_ind,pl.clim)
+colormap(gca, flipud(cbrewer2('RdBu')))
+set(gca,'YDir','normal')
+hold on
+% index significant cluster 
+t.signum = [res.data.clust([res.data.clust.hMC_tsum]).clusternum]; % based on t sum
+% t.signum = [res.data.clust([res.data.clust.hMC_tpeak]).clusternum]; % based on t peak
+% t.signum = [res.data.clust.clusternum]; % uncorrected
+pl.plotdata_cluster = ismember(res.data.tt.clusterlabel,t.signum);
+contour(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.plotdata_cluster,'EdgeColor','g')
+
+title(sprintf('bc tfa noRESS, for ROI %s | cluster corrected;\n %s', ...
+    pl.elecname, vararg2str(p.elec2test)), 'FontSize',8)
+colorbar
+xlabel('time in ms')
+ylabel('frequency in Hz')
+xlim(p.time2test)
+% ylim(pl.flims)
+hline(14.16667,'m')
+set(gca,'FontSize',8)
+
+
+
+
+
+
+
+
+
+
+    
+
+
 %% topoplot
 % pl.time2plot=[500 2000];
 % pl.time2plot=[-1000 0];
