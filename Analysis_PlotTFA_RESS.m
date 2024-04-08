@@ -2199,10 +2199,10 @@ pl.time2plot=[377 1838]; pl.freq2plot=[15 23]; % parietal beta
 
 % specific topos for effects [revisited
 pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
-pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
-pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
-pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
-pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
+% pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
+% pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
+% pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
+% pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
 
 
 % pl.time2plot=[500 2500];
@@ -2292,7 +2292,7 @@ for i_fig = 1:2
     saveas(figs{i_fig},fullfile(sav.pathout,...
         sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'fig')
     print(figs{i_fig},fullfile(sav.pathout,...
-        sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'-depsc2', '-painters','-r300')
+        sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'-depsc2', '-vector','-r300')
 end
 
 %% topoplot differences...rudimentary
