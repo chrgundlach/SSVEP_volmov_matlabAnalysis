@@ -1900,10 +1900,10 @@ p.nperm             = 10000; % number of permutations, if feasible use 100000
 p.plevel            = 0.05;
 p.time2test         = [-3000 3250]; % time in ms
 p.time2plot         = [-3250 3250]; % time in ms
-% p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
+p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
 % p.elec2test         = {'P9';'P10';'PO7';'P7';'P8';'P5';'P6';'PO3';'PO4';'O1';'O2';'I1';'I2'}; pl.elecname = 'visuooccipittemporal';%visual 
 % p.elec2test         = {'C3';'CP3';'C5';'CP5'}; pl.elecname = 'leftmotor'; % motor
-p.elec2test         = {'C3';'CP3'}; pl.elecname = 'smallleftmotor'; % motor
+% p.elec2test         = {'C3';'CP3'}; pl.elecname = 'smallleftmotor'; % motor
 
 pl.freq2test        = [3 35];
 pl.freq2test_idx    = dsearchn(TFA.frequency',pl.freq2test');
@@ -1912,7 +1912,7 @@ p.time2test_idx     = dsearchn(TFA.time', p.time2test');
 pl.elec2test_i      = logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), p.elec2test, 'UniformOutput',false)),1));
 
 p.overwrite         = false; % redo calculation
-% p.overwrite         = true; % redo calculation
+p.overwrite         = true; % redo calculation
 
 
 % p.tfce_olddate = '26-Mar-2024';
@@ -2080,7 +2080,7 @@ end
 figure;
 pl.data_ind = mean(res.data4cc2_tfa,3);
 pl.clim = [-1 1]*max(abs(pl.data_ind),[],'all');
-imagesc(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency(pl.freq2test_idx(1):pl.freq2test_idx(2)),pl.data_ind,pl.clim)
+imagesc(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.data_ind,pl.clim)
 colormap(gca, flipud(cbrewer2('RdBu')))
 set(gca,'YDir','normal')
 hold on
@@ -2089,7 +2089,7 @@ t.signum = [res.data.clust([res.data.clust.hMC_tsum]).clusternum]; % based on t 
 % t.signum = [res.data.clust([res.data.clust.hMC_tpeak]).clusternum]; % based on t peak
 % t.signum = [res.data.clust.clusternum]; % uncorrected
 pl.plotdata_cluster = ismember(res.data.tt.clusterlabel,t.signum);
-contour(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency(pl.freq2test_idx(1):pl.freq2test_idx(2)),pl.plotdata_cluster,'EdgeColor','g')
+contour(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.plotdata_cluster,'EdgeColor','g')
 
 title(sprintf('bc tfa noRESS, for ROI %s | cluster corrected;\n %s', ...
     pl.elecname, vararg2str(p.elec2test)), 'FontSize',8)
