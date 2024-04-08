@@ -410,7 +410,7 @@ colormap(gca,t.colormap)
 h.a1 = axes('position',[0.85 0.45 0.14 0.14],'Visible','off');
 topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes', 'on','whitebk','on',...
     'emarker2',{find(pl.elec2plot_i),'o','r',5,1});
-
+ 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
 sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu'};
@@ -1900,10 +1900,10 @@ p.nperm             = 10000; % number of permutations, if feasible use 100000
 p.plevel            = 0.05;
 p.time2test         = [-3000 3250]; % time in ms
 p.time2plot         = [-3250 3250]; % time in ms
-p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
+% p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
 % p.elec2test         = {'P9';'P10';'PO7';'P7';'P8';'P5';'P6';'PO3';'PO4';'O1';'O2';'I1';'I2'}; pl.elecname = 'visuooccipittemporal';%visual 
 % p.elec2test         = {'C3';'CP3';'C5';'CP5'}; pl.elecname = 'leftmotor'; % motor
-% p.elec2test         = {'C3';'CP3'}; pl.elecname = 'smallleftmotor'; % motor
+p.elec2test         = {'C3';'CP3'}; pl.elecname = 'smallleftmotor'; % motor
 
 pl.freq2test        = [3 35];
 pl.freq2test_idx    = dsearchn(TFA.frequency',pl.freq2test');
@@ -1912,7 +1912,7 @@ p.time2test_idx     = dsearchn(TFA.time', p.time2test');
 pl.elec2test_i      = logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), p.elec2test, 'UniformOutput',false)),1));
 
 p.overwrite         = false; % redo calculation
-p.overwrite         = true; % redo calculation
+% p.overwrite         = true; % redo calculation
 
 
 % p.tfce_olddate = '26-Mar-2024';
@@ -2080,7 +2080,7 @@ end
 figure;
 pl.data_ind = mean(res.data4cc2_tfa,3);
 pl.clim = [-1 1]*max(abs(pl.data_ind),[],'all');
-imagesc(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.data_ind,pl.clim)
+imagesc(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency(pl.freq2test_idx(1):pl.freq2test_idx(2)),pl.data_ind,pl.clim)
 colormap(gca, flipud(cbrewer2('RdBu')))
 set(gca,'YDir','normal')
 hold on
@@ -2089,7 +2089,7 @@ t.signum = [res.data.clust([res.data.clust.hMC_tsum]).clusternum]; % based on t 
 % t.signum = [res.data.clust([res.data.clust.hMC_tpeak]).clusternum]; % based on t peak
 % t.signum = [res.data.clust.clusternum]; % uncorrected
 pl.plotdata_cluster = ismember(res.data.tt.clusterlabel,t.signum);
-contour(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency,pl.plotdata_cluster,'EdgeColor','g')
+contour(TFA.time(p.time2test_idx(1):p.time2test_idx(2)),TFA.frequency(pl.freq2test_idx(1):pl.freq2test_idx(2)),pl.plotdata_cluster,'EdgeColor','g')
 
 title(sprintf('bc tfa noRESS, for ROI %s | cluster corrected;\n %s', ...
     pl.elecname, vararg2str(p.elec2test)), 'FontSize',8)
@@ -2198,8 +2198,8 @@ pl.time2plot=[377 1838]; pl.freq2plot=[15 23]; % parietal beta
 
 
 % specific topos for effects [revisited
-pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
-pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
+% pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
+% pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
 pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
 pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
 pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
@@ -2282,7 +2282,7 @@ set(h.cb,'Position',[t.pos(1)+0.08 t.pos(2)+(1/6)*t.pos(4) t.pos(3) t.pos(4)*2/3
 
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
+% sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
 sav.filenames = {'TOPO_raw_effects';'TOPO_bc_effects'};
 for i_fig = 1:2
     print(figs{i_fig}, fullfile(sav.pathout,...
@@ -2292,7 +2292,7 @@ for i_fig = 1:2
     saveas(figs{i_fig},fullfile(sav.pathout,...
         sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'fig')
     print(figs{i_fig},fullfile(sav.pathout,...
-        sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'-depsc2', '-painters','-r300')
+        sprintf('%s_%1.0f_%1.0fHz_%1.0f_%1.0fms',sav.filenames{i_fig},pl.freq2plot,pl.time2plot)),'-depsc2', '-vector','-r300')
 end
 
 %% topoplot differences...rudimentary

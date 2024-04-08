@@ -2198,11 +2198,11 @@ pl.time2plot=[377 1838]; pl.freq2plot=[15 23]; % parietal beta
 
 
 % specific topos for effects [revisited
-pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
+% pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
 % pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
-% pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
-% pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
-% pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
+pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
+pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
+pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
 
 
 % pl.time2plot=[500 2500];
@@ -2282,7 +2282,7 @@ set(h.cb,'Position',[t.pos(1)+0.08 t.pos(2)+(1/6)*t.pos(4) t.pos(3) t.pos(4)*2/3
 
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
+% sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
 sav.filenames = {'TOPO_raw_effects';'TOPO_bc_effects'};
 for i_fig = 1:2
     print(figs{i_fig}, fullfile(sav.pathout,...
