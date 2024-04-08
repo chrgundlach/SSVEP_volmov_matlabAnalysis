@@ -117,9 +117,9 @@ end
 % pl.elec2plot = {'PO3';'POz';'PO4';'O1';'Oz';'O2';'Iz'}; % steady state I
 % pl.elec2plot = {'POz';'O1';'Oz';'O2';'I1';'Iz';'I2'}; % steady state II
 % pl.elec2plot = {'PO4';'O2';'PO8';'P8';'P10';'I2'}; % vis alpha
-pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; sav.chan_add = 'VisualLarge';% vis alpha II
+% pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; sav.chan_add = 'VisualLarge';% vis alpha II
 % pl.elec2plot = {'POz'}; % vis alpha II
-% pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
+pl.elec2plot = {'C3';'CP3'};  sav.chan_add = 'MotorSmall';% motor alpha/beta I
 % pl.elec2plot = {'C3';'CP3';'C5';'CP5'};  sav.chan_add = 'MotorLarge';% motor alpha/beta II
 % pl.elec2plot = {'F1';'F2';'Fz'}; sav.chan_add = 'Frontal1'; % frontal
 % pl.elec2plot = {'FP1';'FP2'}; sav.chan_add = 'Frontal2'; % frontal
@@ -149,6 +149,7 @@ pl.subs2use = 1:numel(F.Subjects2Use);
 % pl.subs2use = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20]; % subjects discarded due to low trial number version 2
 clear figs fig
 
+pl.fre2index = [8 14 15 30];
 
 %%%%%%%%%%%%%
 % raw induced no RESS
@@ -171,6 +172,7 @@ ylabel('frequency in Hz')
 xlim(pl.xlims)
 ylim(pl.flims)
 hline(14.16667,'m')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 % set(gca,'ColorScale','log')
 cb = colorbar();
@@ -187,6 +189,7 @@ ylabel('frequency in Hz')
 xlim(pl.xlims)
 ylim(pl.flims)
 hline(14.16667,'m')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 % set(gca,'ColorScale','log')
 cb = colorbar();
@@ -228,6 +231,7 @@ ylim(pl.flims)
 % freezeColors
 % h.cb1=cbfreeze(h.cb1);
 hline(14.16667,'m')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 
 t.clims1=[0 1]*max(max(pl.data_ind(t.find1:t.find2,t.ind1:t.ind2)));
@@ -242,7 +246,7 @@ TFA.pvals_induced_bc=squeeze(tt.p);
 tt.stats.tstat = squeeze(tt.stats.tstat);
 
 % do cluster correction?
-flag_cluster = 1;
+flag_cluster = 0;
 pl.permute_n = 100;
 if flag_cluster == 1
     fprintf('running Monte Carlo Simulation with %1.0f repetitions: %7.0f',pl.permute_n,0)
@@ -326,6 +330,7 @@ set(h.cb2,'YTick',pl.pcorrect(1:find(pl.pcorrect<t.clim(end),1,'last')), ...
     'YTickLabel',pl.plegend(1:find(pl.pcorrect<t.clim(end),1,'last')),'FontSize',8)
 % h.cb2=cbfreeze(h.cb2);
 hline(14.16667,'g')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 colormap(gca,t.colormap)
 
@@ -363,6 +368,7 @@ ylim(pl.flims)
 set(h.cb1,'FontSize',8)
 % h.cb1=cbfreeze(h.cb1);
 hline(14.16667,'m')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 
 h.sp2=subplot(2,1,2);
@@ -396,6 +402,7 @@ set(h.cb2,'YTick',pl.pcorrect(1:find(pl.pcorrect<t.clim(end),1,'last')), ...
     'YTickLabel',pl.plegend(1:find(pl.pcorrect<t.clim(end),1,'last')),'FontSize',8)
 % h.cb2=cbfreeze(h.cb2);
 hline(14.16667,'g')
+hline(pl.fre2index,'c')
 set(gca,'FontSize',8)
 colormap(gca,t.colormap)
 
@@ -405,11 +412,12 @@ topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes',
     'emarker2',{find(pl.elec2plot_i),'o','r',5,1});
 
 % sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-% sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
-% for i_fig = 1:3
+% % sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
+% sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu'};
+% for i_fig = 1:2
 %     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-djpeg','-r300')
 %     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-depsc2', '-painters','-r300')
+%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-depsc2', '-vector','-r300')
 % end
 
 
@@ -1191,6 +1199,13 @@ pl.parameters = {...
     [20 30] {'C3';'CP3'} 'data_induced_bc' [23 150 118]./255 2 'mot high beta' 'noRESS';...
     };
 
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+    [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+    [15 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
 
 
 
@@ -1299,7 +1314,7 @@ sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
-sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_6'};
+sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_7'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
 % for i_fig = 1:1
 %     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
@@ -1725,12 +1740,12 @@ p.e_h               = [0.66 2]; % tfce parameter
 p.Samp              = 128; % data sampling rate (TFA.srate)
 p.nperm             = 10000; % number of permutations, if feasible use 100000
 p.plevel            = 0.05;
-p.time2test         = [-3000 3500]; % time in ms
+p.time2test         = [-3000 3250]; % time in ms
 % p.freq2test         = [8 12]; % frequency in Hz alpha
-% p.freq2test         = [8 14]; % frequency in Hz alpha
+p.freq2test         = [8 14]; % frequency in Hz alpha
 % p.freq2test         = [10 14]; % frequency in Hz alpha
 % p.freq2test         = [15 20]; % frequency in Hz low beta
-p.freq2test         = [20 30]; % frequency in Hz high beta
+% p.freq2test         = [20 30]; % frequency in Hz high beta
 
 
 p.time2test_idx     = dsearchn(TFA.time', p.time2test');
@@ -1883,7 +1898,8 @@ p.e_h               = [0.66 2]; % tfce parameter
 p.Samp              = 128; % data sampling rate (TFA.srate)
 p.nperm             = 10000; % number of permutations, if feasible use 100000
 p.plevel            = 0.05;
-p.time2test         = [-3000 3500]; % time in ms
+p.time2test         = [-3000 3250]; % time in ms
+p.time2plot         = [-3250 3250]; % time in ms
 p.elec2test         = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.elecname = 'visuooccipital';%visual 
 % p.elec2test         = {'P9';'P10';'PO7';'P7';'P8';'P5';'P6';'PO3';'PO4';'O1';'O2';'I1';'I2'}; pl.elecname = 'visuooccipittemporal';%visual 
 % p.elec2test         = {'C3';'CP3';'C5';'CP5'}; pl.elecname = 'leftmotor'; % motor
@@ -2178,6 +2194,14 @@ pl.time2plot=[-1654 -287.1]; pl.freq2plot=[15 23]; % parietal beta
 pl.time2plot=[377 1838]; pl.freq2plot=[15 23]; % parietal beta
 
 
+% specific topos for effects [revisited
+pl.time2plot=[-1037.11 244.14]; pl.freq2plot=[8 14]; %vis. alpha
+pl.time2plot=[-1427.73 439.45]; pl.freq2plot=[8 14]; %motor. alpha
+pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
+pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
+pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
+
+
 % pl.time2plot=[500 2500];
 % pl.time2plot=[500 2000];
 % pl.time2plot=[500 1000];
@@ -2255,6 +2279,7 @@ set(h.cb,'Position',[t.pos(1)+0.08 t.pos(2)+(1/6)*t.pos(4) t.pos(3) t.pos(4)*2/3
 
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
+sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
 sav.filenames = {'TOPO_raw_effects';'TOPO_bc_effects'};
 for i_fig = 1:2
     print(figs{i_fig}, fullfile(sav.pathout,...
