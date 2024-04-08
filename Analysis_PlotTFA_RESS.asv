@@ -117,9 +117,9 @@ end
 % pl.elec2plot = {'PO3';'POz';'PO4';'O1';'Oz';'O2';'Iz'}; % steady state I
 % pl.elec2plot = {'POz';'O1';'Oz';'O2';'I1';'Iz';'I2'}; % steady state II
 % pl.elec2plot = {'PO4';'O2';'PO8';'P8';'P10';'I2'}; % vis alpha
-pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; sav.chan_add = 'VisualLarge';% vis alpha II
+% pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; sav.chan_add = 'VisualLarge';% vis alpha II
 % pl.elec2plot = {'POz'}; % vis alpha II
-% pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
+pl.elec2plot = {'C3';'CP3'};  sav.chan_add = 'MotorSmall';% motor alpha/beta I
 % pl.elec2plot = {'C3';'CP3';'C5';'CP5'};  sav.chan_add = 'MotorLarge';% motor alpha/beta II
 % pl.elec2plot = {'F1';'F2';'Fz'}; sav.chan_add = 'Frontal1'; % frontal
 % pl.elec2plot = {'FP1';'FP2'}; sav.chan_add = 'Frontal2'; % frontal
@@ -149,6 +149,7 @@ pl.subs2use = 1:numel(F.Subjects2Use);
 % pl.subs2use = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20]; % subjects discarded due to low trial number version 2
 clear figs fig
 
+pl.fre2index = [8 14 15 30];
 
 %%%%%%%%%%%%%
 % raw induced no RESS
@@ -171,6 +172,7 @@ ylabel('frequency in Hz')
 xlim(pl.xlims)
 ylim(pl.flims)
 hline(14.16667,'m')
+hline()
 set(gca,'FontSize',8)
 % set(gca,'ColorScale','log')
 cb = colorbar();
@@ -242,7 +244,7 @@ TFA.pvals_induced_bc=squeeze(tt.p);
 tt.stats.tstat = squeeze(tt.stats.tstat);
 
 % do cluster correction?
-flag_cluster = 1;
+flag_cluster = 0;
 pl.permute_n = 100;
 if flag_cluster == 1
     fprintf('running Monte Carlo Simulation with %1.0f repetitions: %7.0f',pl.permute_n,0)
@@ -421,10 +423,10 @@ topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes',
 % pl.elec2plot = {'PO3';'POz';'PO4';'O1';'Oz';'O2';'Iz'}; % steady state I
 % pl.elec2plot = {'POz';'O1';'Oz';'O2';'I1';'Iz';'I2'}; % steady state II
 % pl.elec2plot = {'PO4';'O2';'PO8';'P8';'P10';'I2'}; % vis alpha
-pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; % vis alpha II
+% pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; % vis alpha II
 % pl.elec2plot = {'POz'}; % vis alpha II
 % pl.elec2plot = {'POz'}; % vis alpha IV
-% pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
+pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
 % pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; % motor alpha/beta II
 % pl.elec2plot = {'F1';'F2';'Fz'}; % frontal
 % pl.elec2plot = {'Fp1';'Fp2'}; % frontal
@@ -778,7 +780,7 @@ colormap(gca,t.colormap)
 
 %% plot timecourse of frequency
 % pl.freq2plot=[14.16667 14.16667];
-pl.freq2plot=[10 14];
+pl.freq2plot=[8 14];
 % pl.freq2plot=[15 25];
 % pl.freq2plot=[20 30];
 % pl.freq2plot=[8 14];
@@ -794,8 +796,8 @@ pl.freq2plot=[10 14];
 % pl.elec2plot = {'POz'}; % vis alpha II
 % pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; % vis alpha III
 % pl.elec2plot = {'POz';'Pz';'P1';'P2'}; % vis alpha II
-% pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
-pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; % motor alpha/beta II
+pl.elec2plot = {'C3';'CP3'}; % motor alpha/beta
+% pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; % motor alpha/beta II
 % pl.elec2plot = {TFA.electrodes(1:64).labels}';
 pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), pl.elec2plot, 'UniformOutput',false)),1));
 
@@ -1012,6 +1014,15 @@ pl.parameters = {...
 %     [8 12] {'CP1';'CPz';'CP2';'P1';'Pz';'P2'} 'data_induced_bc' [0 0.8 0.8] 2 'parietal alpha' 'noRESS';...
 %     };
 
+% most straight forward?
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+    [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+    [15 20] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot low beta' 'noRESS';...
+    [20 30] {'C3';'CP3'} 'data_induced_bc' [23 150 118]./255 2 'mot high beta' 'noRESS';...
+    };
+
 
 
 
@@ -1174,6 +1185,14 @@ pl.parameters = {...
 %     };
 
 
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+    [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+    [15 20] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot low beta' 'noRESS';...
+    [20 30] {'C3';'CP3'} 'data_induced_bc' [23 150 118]./255 2 'mot high beta' 'noRESS';...
+    };
+
 
 
 
@@ -1225,8 +1244,8 @@ for i_pl = 1:size(pl.parameters,1)
     eval(com)
     [tt.h tt.p tt.ci tt.stats]=ttest(pl.data');
     % do cluster based permutation
-%     [cluster_runt_diff, timecourse_runt_diff]=eeg_erpStat_clusterP(pl.data,zeros(size(pl.data)),pl.permut_n,2);
-%     tt.p(timecourse_runt_diff.h_corr==0)=1;
+    [cluster_runt_diff, timecourse_runt_diff]=eeg_erpStat_clusterP(pl.data,zeros(size(pl.data)),pl.permut_n,2);
+    tt.p(timecourse_runt_diff.h_corr==0)=1;
        
     % actual plot with boundedline
     pl.mdata = mean(pl.data,2)';
@@ -1278,17 +1297,18 @@ for i_pl = 1:size(pl.parameters,1)
 end
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
+sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
-sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_5'};
+sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_6'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
-for i_fig = 1:1
+% for i_fig = 1:1
 %     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
 %     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
 %     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-painters','-r300')
-end
+%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
+% end
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
