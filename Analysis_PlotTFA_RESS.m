@@ -135,10 +135,10 @@ pl.xlims=[-3250 3250]; % index time 2 plot
 [t.t t.ind2]=min(abs(TFA.time-pl.xlims(2)));
 
 % pl.flims = TFA.frequency([1 end]); % index frequency 2 plot
-pl.flims = [3 TFA.frequency(end)]; % index frequency 2 plot
+% pl.flims = [3 TFA.frequency(end)]; % index frequency 2 plot
 % pl.flims = [4 TFA.frequency(end)]; % index frequency 2 plot
 % pl.flims = [4 35];
-% pl.flims = [3 35];
+pl.flims = [3 35];
 % pl.flims = [8 44];
 [t.t t.find1]=min(abs(TFA.frequency-pl.flims(1)));
 [t.t t.find2]=min(abs(TFA.frequency-pl.flims(2)));
@@ -411,14 +411,14 @@ h.a1 = axes('position',[0.85 0.45 0.14 0.14],'Visible','off');
 topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes', 'on','whitebk','on',...
     'emarker2',{find(pl.elec2plot_i),'o','r',5,1});
 
-% sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-% % sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
-% sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu'};
-% for i_fig = 1:2
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-djpeg','-r300')
-%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-depsc2', '-vector','-r300')
-% end
+sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
+% sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
+sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu'};
+for i_fig = 1:2
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-djpeg','-r300')
+    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'fig')
+    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s_%s,',sav.filenames{i_fig},sav.chan_add)),'-depsc2', '-vector','-r300')
+end
 
 
 
