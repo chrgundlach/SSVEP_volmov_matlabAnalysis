@@ -410,7 +410,7 @@ colormap(gca,t.colormap)
 h.a1 = axes('position',[0.85 0.45 0.14 0.14],'Visible','off');
 topoplot(find(pl.elec2plot_i),TFA.electrodes(1:64),'style','blank','electrodes', 'on','whitebk','on',...
     'emarker2',{find(pl.elec2plot_i),'o','r',5,1});
-
+ 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu';'Resp_TFA_Amp_BC_Evo'};
 sav.filenames = {'Resp_TFA_Amp_RAW_EvoIndu';'Resp_TFA_Amp_BC_Indu'};
