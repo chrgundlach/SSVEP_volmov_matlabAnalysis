@@ -1324,12 +1324,12 @@ sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
 sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_8_rev01'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
-% for i_fig = 1:1
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
-%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
-% end
+for i_fig = 1:1
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
+    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
+    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
+end
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
@@ -2212,12 +2212,6 @@ pl.time2plot=[1291 2728.52]; pl.freq2plot=[8 14]; %motor. alpha
 pl.time2plot=[-1333.98 228.52]; pl.freq2plot=[15 30]; %motor. beta
 pl.time2plot=[400.39 3250]; pl.freq2plot=[15 30]; %motor. beta
 
-% specific topos for effects [revision
-% pl.time2plot=[-1014 229]; pl.freq2plot=[8 13.167]; %vis. alpha
-% pl.time2plot=[-1412 494]; pl.freq2plot=[8 13.167]; %motor. alpha
-pl.time2plot=[1314 2705]; pl.freq2plot=[8 13.167]; %motor. alpha
-
-
 
 % pl.time2plot=[500 2500];
 % pl.time2plot=[500 2000];
@@ -2295,8 +2289,8 @@ t.pos = get(h.cb,'Position');
 set(h.cb,'Position',[t.pos(1)+0.08 t.pos(2)+(1/6)*t.pos(4) t.pos(3) t.pos(4)*2/3 ])
 
 
-% sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
+sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
+% sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\';
 sav.filenames = {'TOPO_raw_effects';'TOPO_bc_effects'};
 for i_fig = 1:2
     print(figs{i_fig}, fullfile(sav.pathout,...
