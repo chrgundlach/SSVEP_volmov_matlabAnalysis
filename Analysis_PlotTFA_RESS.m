@@ -1216,9 +1216,9 @@ pl.subs2use = 1:numel(F.Subjects2Use);
 % 
 % pl.subs2use = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; % subjects discarded due to low trial number version 2
 
-% pl.xlim = [-3250 3250];
-pl.xlim = [-4000 4000];
-pl.xlim = [-3500 3500];
+pl.xlim = [-3250 3250];
+% pl.xlim = [-4000 4000];
+% pl.xlim = [-3500 3500];
 
 pl.plotnum = [ceil(sqrt(size(pl.parameters,1))) round(sqrt(size(pl.parameters,1)))*3+5];
 pl.plpos = reshape(sort(...
@@ -1310,18 +1310,18 @@ for i_pl = 1:size(pl.parameters,1)
 end
 
 sav.pathout = 'C:\Users\psy05cvd\Dropbox\work\matlab\AnalyzerUni\SSVEP_volmov\figures\';
-sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
+% sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
-sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_7'};
+sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_8'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
-% for i_fig = 1:1
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
-%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
-% end
+for i_fig = 1:1
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
+    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
+    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
+end
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter

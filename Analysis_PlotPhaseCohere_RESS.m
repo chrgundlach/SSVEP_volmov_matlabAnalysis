@@ -3,7 +3,7 @@
 
 clearvars
 %% parameters
-F.PathIn                = 'D:\work\data\SSVEP_volmov\EEG\PHASECOHERE_RESS_noblinks_CSD';
+F.PathIn                = 'E:\work\data\SSVEP_volmov\EEG\PHASECOHERE_RESS_noblinks_CSD';
 % F.Subjects2Use          = [1 2 3 4 5 7 8 10 ];
 F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %based on trial number without blinks
 F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %based on trial number without blinks
