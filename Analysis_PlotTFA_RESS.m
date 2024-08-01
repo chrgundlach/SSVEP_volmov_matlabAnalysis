@@ -21,7 +21,8 @@ F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %
 % TFA.baseline            = [-3000 -2750];
 % TFA.baseline            = [-2750 -2500];
 % TFA.baseline            = [-2250 -2000];
-TFA.baseline            = [-3250 -3000];
+TFA.baseline            = [-3250 -3000]; % for publication
+TFA.baseline            = [-3250 -2250]; % for revision as asked by a reviewer
 % TFA.baseline            = [-4000 -3500];
 % TFA.baseline            = [-4500 -4000];
 
@@ -1322,14 +1323,14 @@ sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
-sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_8_rev01'};
+sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_9_rev01'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
-% for i_fig = 1:1
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
-%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
-%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
-% end
+for i_fig = 1:1
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
+    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
+    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
+    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
+end
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
