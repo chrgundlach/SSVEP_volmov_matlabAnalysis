@@ -22,7 +22,7 @@ F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %
 % TFA.baseline            = [-2750 -2500];
 % TFA.baseline            = [-2250 -2000];
 TFA.baseline            = [-3250 -3000]; % for publication
-TFA.baseline            = [-3250 -2250]; % for revision as asked by a reviewer
+% TFA.baseline            = [-3250 -2250]; % for revision as asked by a reviewer
 % TFA.baseline            = [-4000 -3500];
 % TFA.baseline            = [-4500 -4000];
 
@@ -1292,6 +1292,57 @@ for i_pl = 1:size(pl.parameters,1)
     pl.maxdata = max(cell2mat(cellfun(@(x) max(abs(double(x))), get(get(gca,'Children'),'YData'),'UniformOutput',false)));
     pl.y = 1*pl.maxdata*(1+0.05+0.05*2);
     plot(TFA.time(t.ind3:t.ind4),pl.tdata2.*pl.y,'Color',[pl.parameters{i_pl,4} 1],'LineWidth',6)
+
+    % display some effects numerically
+    if any(~isnan(pl.tdata2))
+        fprintf('results for %s:\n',pl.parameters{i_pl,6})
+        % positive cluster
+        if ~isempty(cluster_runt_diff.positive.h)
+            t.clustidx = find(cluster_runt_diff.positive.h==1);
+            for i_clust = 1:numel(t.clustidx)
+                % extrct relevant data
+                t.clust.time = TFA.time(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}([1 end])+t.ind3-1);
+                t.clust.mod_avg = mean(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_sd = std(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_max = max(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_tmax = max(tt.stats.tstat(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_Dmax = t.clust.mod_tmax/sqrt(size(pl.data,2));
+                t.clust.mod_tavg = mean(tt.stats.tstat(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_Davg = t.clust.mod_tavg/sqrt(size(pl.data,2));
+                t.clust.MonteCarloP = cluster_runt_diff.positive.p(t.clustidx(t.clustidx(i_clust)));
+
+                % check cluster
+                [t.clust.tt.h t.clust.tt.p t.clust.tt.ci t.clust.tt.stats]= ...
+                    ttest(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:)));
+                t.clust.tt.stats.tstat/sqrt(size(pl.data,2));
+
+                % fprintf
+                fprintf(['positive cluster %1.0f: from %1.0f to %1.0f ms; avg mod = %1.3f; sd mod = %1.3f; ' ...
+                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f\n'], ...
+                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP)
+            end
+        end
+
+        % negative cluster
+        if ~isempty(cluster_runt_diff.negative.h)
+            t.clustidx = find(cluster_runt_diff.negative.h==1);
+            for i_clust = 1:numel(t.clustidx)
+                % extrct relevant data
+                t.clust.time = TFA.time(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}([1 end])+t.ind3-1);
+                t.clust.mod_avg = mean(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_sd = std(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_max = min(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_tmax = min(tt.stats.tstat(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_Dmax = t.clust.mod_tmax/sqrt(size(pl.data,2));
+                t.clust.MonteCarloP = cluster_runt_diff.negative.p(t.clustidx(t.clustidx(i_clust)));
+
+                % fprintf
+                fprintf(['negative cluster %1.0f: from %1.0f to %1.0f ms; avg mod = %1.3f; sd mod = %1.3f; ' ...
+                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f\n'], ...
+                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP)
+            end
+        end
+    end
     
     
     % graphics
@@ -1325,12 +1376,12 @@ sav.pathout = 'C:\Users\EEG\Documents\MATLAB\christopher\SSVEP_volmov\figures\';
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_5'};
 sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_9_rev01'};
 % sav.filenames = {'Resp_AllSignals_Amp_Timecourse_v2_clustcorr_5b'};
-for i_fig = 1:1
-    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
-    print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
-    saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
-    print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
-end
+% for i_fig = 1:1
+%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-dpng','-r300')
+%     print(figs{i_fig}, fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-djpeg','-r300')
+%     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
+%     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
+% end
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
