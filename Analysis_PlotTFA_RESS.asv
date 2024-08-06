@@ -1303,23 +1303,26 @@ for i_pl = 1:size(pl.parameters,1)
                 % extrct relevant data
                 t.clust.time = TFA.time(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}([1 end])+t.ind3-1);
                 t.clust.mod_avg = mean(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
-                t.clust.mod_sd = std(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
+                t.clust.mod_sd = std(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:)));
+                t.clust.mod_sdwithin = std(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
                 t.clust.mod_max = max(pl.mdata(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
                 t.clust.mod_tmax = max(tt.stats.tstat(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
                 t.clust.mod_Dmax = t.clust.mod_tmax/sqrt(size(pl.data,2));
                 t.clust.mod_tavg = mean(tt.stats.tstat(cluster_runt_diff.positive.samples{t.clustidx(i_clust)}));
                 t.clust.mod_Davg = t.clust.mod_tavg/sqrt(size(pl.data,2));
+                t.clust.mod_D_cluster = mean(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:))) / ...
+                    std(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:))); % as in publication
                 t.clust.MonteCarloP = cluster_runt_diff.positive.p(t.clustidx(t.clustidx(i_clust)));
 
-                % check cluster
-                [t.clust.tt.h t.clust.tt.p t.clust.tt.ci t.clust.tt.stats]= ...
-                    ttest(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:)));
-                t.clust.tt.stats.tstat/sqrt(size(pl.data,2));
+%                 % check cluster
+%                 [t.clust.tt.h t.clust.tt.p t.clust.tt.ci t.clust.tt.stats]= ...
+%                     ttest(mean(pl.data(cluster_runt_diff.positive.samples{t.clustidx(i_clust)},:)));
+%                 t.clust.tt.stats.tstat/sqrt(size(pl.data,2));
 
                 % fprintf
                 fprintf(['positive cluster %1.0f: from %1.0f to %1.0f ms; avg mod = %1.3f; sd mod = %1.3f; ' ...
-                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f\n'], ...
-                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP)
+                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f; cluster D = %1.3f\n'], ...
+                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP, t.clust.mod_D_cluster)
             end
         end
 
@@ -1330,16 +1333,21 @@ for i_pl = 1:size(pl.parameters,1)
                 % extrct relevant data
                 t.clust.time = TFA.time(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}([1 end])+t.ind3-1);
                 t.clust.mod_avg = mean(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
-                t.clust.mod_sd = std(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_sd = std(mean(pl.data(cluster_runt_diff.negative.samples{t.clustidx(i_clust)},:)));
+                t.clust.mod_sdwithin = std(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
                 t.clust.mod_max = min(pl.mdata(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
                 t.clust.mod_tmax = min(tt.stats.tstat(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
                 t.clust.mod_Dmax = t.clust.mod_tmax/sqrt(size(pl.data,2));
+                t.clust.mod_tavg = mean(tt.stats.tstat(cluster_runt_diff.negative.samples{t.clustidx(i_clust)}));
+                t.clust.mod_Davg = t.clust.mod_tavg/sqrt(size(pl.data,2));
+                t.clust.mod_D_cluster = mean(mean(pl.data(cluster_runt_diff.negative.samples{t.clustidx(i_clust)},:))) / ...
+                    std(mean(pl.data(cluster_runt_diff.negative.samples{t.clustidx(i_clust)},:))); % as in publication
                 t.clust.MonteCarloP = cluster_runt_diff.negative.p(t.clustidx(t.clustidx(i_clust)));
 
                 % fprintf
                 fprintf(['negative cluster %1.0f: from %1.0f to %1.0f ms; avg mod = %1.3f; sd mod = %1.3f; ' ...
-                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f\n'], ...
-                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP)
+                    'max mod = %1.3f; max t = %1.3f; max D = %1.3f; cluster p = %1.3f; cluster D = %1.3f\n'], ...
+                    i_clust, t.clust.time, t.clust.mod_avg, t.clust.mod_sd, t.clust.mod_max, t.clust.mod_tmax, t.clust.mod_Dmax, t.clust.MonteCarloP, t.clust.mod_D_cluster)
             end
         end
     end
@@ -1382,6 +1390,205 @@ sav.filenames = {'Resp_AllSignals_Amp_Timecourse_sep_v2_9_rev01'};
 %     saveas(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'fig')
 %     print(figs{i_fig},fullfile(sav.pathout,sprintf('%s',sav.filenames{i_fig})),'-depsc2', '-vector','-r300')
 % end
+
+
+%% somehow extract some values supporting the null hypothesis (Bayes)
+clear figs h
+
+
+
+
+% for publication at psychophysiology
+pl.parameters = {...
+%     [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+%     [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+%     [15 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
+% for review
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 13.16667] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+%     [8 13.16667] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+%     [15.16667 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
+
+% no baseline correction initially
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 13.16667] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+%     [8 13.16667] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+%     [15.16667 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
+
+
+pl.subs2use = 1:numel(F.Subjects2Use);
+% pl.subs2use = [1:14 16 :20];
+% pl.subs2use = [1 2 3 4 5 7 8 10 11 12 13 14 17 18 19 20]; % subjects discarded due to low trial number version 1
+% pl.subs2use = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20]; % subjects discarded due to low trial number version 2
+% 
+% pl.subs2use = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; % subjects discarded due to low trial number version 2
+
+pl.xlim = [-3250 3250];
+pl.xlim = [-3250 3250];
+% pl.xlim = [-4000 4000];
+% pl.xlim = [-3500 3500];
+
+pl.baseline = TFA.baseline;
+
+pl.permut_n = 10000;
+% pl.permut_n = 100;
+
+clearvars cluster_runt_diff timecourse_runt_diff tt 
+pl.data = []; pl.data_base = [];
+for i_pl = 1:size(pl.parameters,1)
+    
+    % index frequencies
+    [t.t t.ind1]=min(abs(TFA.frequency-pl.parameters{i_pl,1}(1)));
+    [t.t t.ind2]=min(abs(TFA.frequency-pl.parameters{i_pl,1}(2)));
+    
+    % index time
+    [t.t t.ind3]=min(abs(TFA.time-pl.xlim(1)));
+    [t.t t.ind4]=min(abs(TFA.time-pl.xlim(2)));
+    
+    % index baseline
+    t.ind_b = dsearchn(TFA.time', pl.baseline');
+    
+    % index electrodes
+    switch  pl.parameters{i_pl,7}
+        case 'noRESS'
+            pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), pl.parameters{i_pl,2}, 'UniformOutput',false)),1));
+            com=sprintf('pl.data{i_pl}=squeeze(nanmean(nanmean(TFA.%s(t.ind1:t.ind2,t.ind3:t.ind4,pl.elec2plot_i,pl.subs2use),1),3));',pl.parameters{i_pl,3});
+            com2=sprintf('pl.data_base{i_pl}=squeeze(nanmean(TFA.%s(t.ind1:t.ind2,t.ind_b(1):t.ind_b(2),pl.elec2plot_i,pl.subs2use),[1,2,3]));',pl.parameters{i_pl,3});
+        
+        case 'RESS'
+            pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes_RESS.labels},x), pl.parameters{i_pl,2}, 'UniformOutput',false)),1));
+            com=sprintf('pl.data{i_pl}=squeeze(nanmean(TFA.%s(t.ind1:t.ind2,t.ind3:t.ind4,pl.subs2use),1));',pl.parameters{i_pl,3});
+            com2=sprintf('pl.data_base{i_pl}=squeeze(nanmean(TFA.%s(t.ind1:t.ind2,t.ind_b(1):t.ind_b(2),pl.subs2use),[1,2]));',pl.parameters{i_pl,3});
+        
+    end
+    eval(com)
+    eval(com2)
+    [tt(i_pl).h tt(i_pl).p tt(i_pl).ci tt(i_pl).stats]=ttest(pl.data{i_pl}');
+    [tt2(i_pl).h tt2(i_pl).p tt2(i_pl).ci tt2(i_pl).stats]=ttest(pl.data{i_pl}'-pl.data_base{i_pl});
+    % do cluster based permutation
+    [cluster_runt_diff(i_pl), timecourse_runt_diff(i_pl)]=eeg_erpStat_clusterP(pl.data{i_pl},zeros(size(pl.data{i_pl})),pl.permut_n,2);
+    [cluster_runt_diff2(i_pl), timecourse_runt_diff2(i_pl)]=eeg_erpStat_clusterP( ...
+        pl.data{i_pl}, repmat(pl.data_base{i_pl}',size(pl.data{i_pl},1),1),pl.permut_n,2);
+    tt(i_pl).p(timecourse_runt_diff(i_pl).h_corr==0)=1;
+end
+
+% calculate bootstrap sample of data and null distribution
+% try out a few things
+nullstat.btstrp_data = nan(pl.permut_n, size(pl.data{1},1));
+nullstat.btstrp_randdata1 = zeros(pl.permut_n, size(pl.data{1},1)); % zeros
+nullstat.btstrp_randdata2 = nan(pl.permut_n, size(pl.data{1},1)); % random value from time range
+nullstat.btstrp_randdata3 = nan(pl.permut_n, size(pl.data{1},1)); % random bootstrap of baseline
+
+fprintf('bootstrapping...')
+for i_perm = 1:pl.permut_n % number of bootstraps
+    t.idx_sub = randsample(1:numel(pl.subs2use),numel(pl.subs2use),true);
+%     t.idx_rand = cell2mat(cellfun(@(x) randsample(x,numel(x), true), repmat({1:size(pl.data{1},1)},numel(pl.subs2use),1), 'UniformOutput', false))';
+    t.idx_rand2 = randsample(1:size(pl.data{1},1),size(pl.data{1},1),true);
+    % bootstrap data
+    nullstat.btstrp_data(i_perm,:) = mean(pl.data{1}(:,t.idx_sub),2);
+
+    % bootstrap nulldistribution
+%     nullstat.btstrp_randdata2(i_perm,:) = mean(pl.data{1}(t.idx_rand),2);
+    nullstat.btstrp_randdata2(i_perm,:) = mean(pl.data{1}(t.idx_rand2, t.idx_sub),2);
+
+    % bootstrap nulldistribution from baseline
+    t.idx_sub2 = randsample(1:numel(pl.subs2use),numel(pl.subs2use),true);
+    nullstat.btstrp_randdata3(i_perm,:) = repmat(mean(pl.data_base{1}(t.idx_sub2),1),1,size(pl.data{1},1));
+end
+fprintf('done!\n\n')
+
+% some explorative plotting
+pl.data_m = mean(nullstat.btstrp_data);
+pl.data_CI = prctile(nullstat.btstrp_data, [2.5 97.5]);
+figure;
+plot(TFA.time(t.ind3:t.ind4),nullstat.btstrp_data,'Color',[0.1 0.1 0.1 0.1]);
+hold on
+plot(TFA.time(t.ind3:t.ind4),pl.data_m,'Color',[0.8 0.2 0.2 1],'LineWidth',1);
+plot(TFA.time(t.ind3:t.ind4),pl.data_CI,'Color',[0.8 0.2 0.2 1],'LineWidth',1,'LineStyle','--');
+xlabel('time in ms')
+ylabel('modulation in %')
+title('bootstrapped time courses + 95%CI')
+xlim(pl.xlim)
+grid on
+
+
+pl.data_m = mean(nullstat.btstrp_randdata2);
+pl.data_CI = prctile(nullstat.btstrp_randdata2, [2.5 97.5]);
+figure;
+plot(TFA.time(t.ind3:t.ind4),nullstat.btstrp_randdata2,'Color',[0.1 0.1 0.1 0.1]);
+hold on
+plot(TFA.time(t.ind3:t.ind4),pl.data_m,'Color',[0.8 0.2 0.2 1],'LineWidth',1);
+plot(TFA.time(t.ind3:t.ind4),pl.data_CI,'Color',[0.8 0.2 0.2 1],'LineWidth',1,'LineStyle','--');
+xlabel('time in ms')
+ylabel('modulation in %')
+title('bootstrapped time courses of random data + 95%CI')
+xlim(pl.xlim)
+grid on
+
+pl.data_m = mean(nullstat.btstrp_randdata3);
+pl.data_CI = prctile(nullstat.btstrp_randdata3, [2.5 97.5]);
+figure;
+plot(TFA.time(t.ind3:t.ind4),nullstat.btstrp_randdata3,'Color',[0.1 0.1 0.1 0.1]);
+hold on
+plot(TFA.time(t.ind3:t.ind4),pl.data_m,'Color',[0.8 0.2 0.2 1],'LineWidth',1);
+plot(TFA.time(t.ind3:t.ind4),pl.data_CI,'Color',[0.8 0.2 0.2 1],'LineWidth',1,'LineStyle','--');
+xlabel('time in ms')
+ylabel('modulation in %')
+title('bootstrapped time courses of random baseline data + 95%CI')
+xlim(pl.xlim)
+grid on
+
+% compare real and random distributions
+nullstat.BF10 = nan(1,size(pl.data{1},1));
+for i_time=1:size(pl.data{1},1)
+    nullstat.BF10(i_time) = bootstrap2BF_z( ...
+        nullstat.btstrp_data(:,i_time), ...
+        nullstat.btstrp_randdata2(:,i_time),0);
+end
+figure;
+h.pl1 = plot(TFA.time(t.ind3:t.ind4),nullstat.BF10);
+hold on
+h.pl2 = plot(TFA.time(t.ind3:t.ind4),1./nullstat.BF10);
+xlabel('time in ms')
+ylabel('BayesFactor')
+title('Bayes Factor comparing real and random data')
+xlim(pl.xlim)
+ylim([-15 15])
+grid on
+yline(3,'c')
+legend([h.pl1, h.pl2], {'BF10';'BF01'})
+
+
+nullstat.BF10 = nan(1,size(pl.data{1},1));
+for i_time=1:size(pl.data{1},1)
+    nullstat.BF10(i_time) = bootstrap2BF_z( ...
+        nullstat.btstrp_data(:,i_time), ...
+        nullstat.btstrp_randdata3(:,i_time),0);
+end
+figure;
+h.pl1 = plot(TFA.time(t.ind3:t.ind4),nullstat.BF10);
+hold on
+h.pl2 = plot(TFA.time(t.ind3:t.ind4),1./nullstat.BF10);
+xlabel('time in ms')
+ylabel('BayesFactor')
+title('Bayes Factor comparing bootstrapped time course and baseline')
+xlim(pl.xlim)
+ylim([-15 15])
+grid on
+yline(3,'c')
+legend([h.pl1, h.pl2], {'BF10';'BF01'})
+
+
+
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
