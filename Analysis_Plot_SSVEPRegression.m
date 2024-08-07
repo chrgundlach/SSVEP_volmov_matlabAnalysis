@@ -6,7 +6,7 @@
 clearvars
 
 %% parameters
-F.PathIn                = 'D:\work\data\SSVEP_volmov\EEG\TFA_lagged_regression';
+F.PathIn                = 'E:\work\data\SSVEP_volmov\EEG\TFA_lagged_regression';
 
 F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %based on trial number without blinks
 % F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 25 26 27];
@@ -74,13 +74,13 @@ end
 %% single plots
 % version 1
 % pl.elec2plot = {'Oz'};
-% pl.elec2plot = {'PO3';'POz';'PO4';'O1';'Oz';'O2';'Iz'}; pl.ROI = 'steady state'; % steady state I
+pl.elec2plot = {'PO3';'POz';'PO4';'O1';'Oz';'O2';'Iz'}; pl.ROI = 'steady state'; % steady state I
 % pl.elec2plot = {'POz';'O1';'Oz';'O2';'I1';'Iz';'I2'}; pl.ROI = 'steady state'; % steady state II
 % pl.elec2plot = {'PO4';'O2';'PO8';'P8';'P10';'I2'}; pl.ROI = 'vis alpha';% vis alpha
 % pl.elec2plot = {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'}; pl.ROI = 'vis alpha'; % vis alpha II
 % pl.elec2plot = {'POz'}; pl.ROI = 'vis alpha'; % vis alpha II
 % pl.elec2plot = {'POz';'Oz'}; pl.ROI = 'vis alpha'; % vis alpha III
-pl.elec2plot = {'C3';'CP3'}; pl.ROI = 'motor'; % motor alpha/beta
+% pl.elec2plot = {'C3';'CP3'}; pl.ROI = 'motor'; % motor alpha/beta
 % pl.elec2plot = {'C3';'CP3';'C5';'CP5'}; pl.ROI = 'motor'; % motor alpha/beta II
 % pl.elec2plot = {'F1';'F2';'Fz'}; pl.ROI = 'frontal'; % frontal
 % pl.elec2plot = {'FP1';'FP2'}; pl.ROI = 'frontal'; % frontal

@@ -6,7 +6,7 @@
 clearvars
 
 %% parameters
-F.PathIn                = 'F:\work\data\SSVEP_volmov\EEG\CORR_TFA_RESS_noblinks';
+F.PathIn                = 'E:\work\data\SSVEP_volmov\EEG\CORR_TFA_RESS_noblinks';
 % F.Subjects2Use          = [1:20];
 %F.Subjects2Use          = [22 23 25 26 27];
 F.Subjects2Use          = [1 2 3 4 5 7 8 10 11 12 14 17 18 19 20 24 25 26 27]; %based on trial number without blinks
@@ -137,8 +137,8 @@ end
 
 %% plotting
 for i_pl = 1:size(corr.parameters,1)
-%     pl.xdata = corr.zscdata.xdata_bc{i_pl}; pl.labeladd = 'zscore bc';  pl.xlimflag = 1;
-%     pl.ydata = corr.zscdata.ydata_bc{i_pl};
+    pl.xdata = corr.zscdata.xdata_bc{i_pl}; pl.labeladd = 'zscore bc';  pl.xlimflag = 1;
+    pl.ydata = corr.zscdata.ydata_bc{i_pl};
 
 
 %     pl.xdata = corr.scdata.xdata_bc{i_pl}; pl.labeladd = 'abs bc';  pl.xlimflag = 1;
@@ -149,8 +149,8 @@ for i_pl = 1:size(corr.parameters,1)
 %     pl.ydata = corr.zscdata.ydata{i_pl};
 
     
-    pl.xdata = corr.scdata.xdata{i_pl}; pl.labeladd = 'abs raw'; pl.xlimflag = 2;
-    pl.ydata = corr.scdata.ydata{i_pl};
+%     pl.xdata = corr.scdata.xdata{i_pl}; pl.labeladd = 'abs raw'; pl.xlimflag = 2;
+%     pl.ydata = corr.scdata.ydata{i_pl};
     
     figure; scatter(pl.xdata,pl.ydata,'.')
     hold on;

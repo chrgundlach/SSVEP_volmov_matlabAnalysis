@@ -1587,8 +1587,71 @@ grid on
 yline(3,'c')
 legend([h.pl1, h.pl2], {'BF10';'BF01'})
 
+%% extract data for time window to do some explorative analyses
+clear figs h
 
 
+
+
+% for publication at psychophysiology
+pl.parameters = {...
+%     [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 14] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+%     [8 14] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+%     [15 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
+% for review
+pl.parameters = {...
+    [14.16667 14.16667] {'RESS'} 'data_RESS_evoked_bc' [0 0 0] 2 sprintf('SSVEP') 'RESS';...
+    [8 13.16667] {'P9';'P10';'PO7';'PO8';'PO3';'PO4';'POz';'O1';'O2';'Oz';'I1';'I2';'Iz'} 'data_induced_bc' [255 151 0]./255 2 'vis alpha' 'noRESS';...
+%     [8 13.16667] {'C3';'CP3'} 'data_induced_bc' [33 92 150]./255 2 'mot alpha' 'noRESS';...
+%     [15.16667 30] {'C3';'CP3'} 'data_induced_bc' [170 99 57]./255 2 'mot beta' 'noRESS';...
+    };
+
+pl.subs2use = 1:numel(F.Subjects2Use);
+
+pl.time2use = [-1014 229]; % visual alpha
+
+
+clearvars cluster_runt_diff timecourse_runt_diff tt 
+pl.data = []; 
+for i_pl = 1:size(pl.parameters,1)
+    
+    % index frequencies
+    [t.t t.ind1]=min(abs(TFA.frequency-pl.parameters{i_pl,1}(1)));
+    [t.t t.ind2]=min(abs(TFA.frequency-pl.parameters{i_pl,1}(2)));
+    
+    % index time
+    [t.t t.ind3]=min(abs(TFA.time-pl.time2use(1)));
+    [t.t t.ind4]=min(abs(TFA.time-pl.time2use(2)));
+    
+        
+    % index electrodes
+    switch  pl.parameters{i_pl,7}
+        case 'noRESS'
+            pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes.labels},x), pl.parameters{i_pl,2}, 'UniformOutput',false)),1));
+            com=sprintf('pl.data{i_pl}=squeeze(nanmean(TFA.%s(t.ind1:t.ind2,t.ind3:t.ind4,pl.elec2plot_i,pl.subs2use),[1,2,3]));',pl.parameters{i_pl,3});
+            
+        case 'RESS'
+            pl.elec2plot_i=logical(sum(cell2mat(cellfun(@(x) strcmp({TFA.electrodes_RESS.labels},x), pl.parameters{i_pl,2}, 'UniformOutput',false)),1));
+            com=sprintf('pl.data{i_pl}=squeeze(nanmean(TFA.%s(t.ind1:t.ind2,t.ind3:t.ind4,pl.subs2use),[1,2]));',pl.parameters{i_pl,3});
+            
+    end
+    eval(com)
+    [tt(i_pl).h tt(i_pl).p tt(i_pl).ci tt(i_pl).stats]=ttest(pl.data{i_pl}');
+    % do cluster based permutation
+    
+end
+
+% save data
+dataout_t = table(F.Subjects2Use(pl.subs2use)',pl.data{1},pl.data{2},'VariableNames',{'particpant','SSVEP','vis.alpha'});
+
+
+t.path = 'C:\Users\psy05cvd\Dropbox\work\R-statistics\experiments\ssvep_volmov\data_in';
+t.datestr = datestr(now,'mm-dd-yyyy_HH-MM');
+% write to textfile
+% writetable(dataout_t,fullfile(t.path,sprintf('GaborModulations_%1.0fto%1.0fms%s.csv',pl.time2use,t.datestr)),'Delimiter',';')
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
