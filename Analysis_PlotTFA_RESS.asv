@@ -1660,13 +1660,7 @@ t.datestr = datestr(now,'mm-dd-yyyy_HH-MM');
 [correl.rho correl.pval] = corr(pl.data{1},pl.data{3}(:,:)', 'type','Spearman');
 fdr(correl.pval)
 
- figure;
- topoplot(correl.rho, TFA.electrodes, ...
-                'shading', 'flat', 'numcontour', 0, 'conv','on','maplimits',[-1 1], ...
-                'colormap',flipud(cbrewer2('RdBu')),'whitebk','on');
-        title(sprintf('significant electrodes in cluster'))
-
-    colorbar
+topo
 
 %% do complete data driven TFCE
 p.e_h               = [0.66 2]; % tfce parameter
